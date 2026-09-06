@@ -1,0 +1,23 @@
+{
+  "skill_name": "finish-the-work",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Here's the third version of my ND Services pricing page copy. Can you tighten it again? I still don't think the tiers are right. We haven't shown it to any schools yet.",
+      "expected_output": "Does the requested tightening. Adds a one or two sentence reflection that this is a third revision with no external feedback, names the practical consequence, and recommends one concrete move such as sending it to one named contact. Does not withhold the edit or lecture.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "What's the difference between a limited company and a sole trader in the UK for someone doing part time consultancy alongside employment?",
+      "expected_output": "Answers the factual question directly with UK specifics. No productivity coaching, no stall reflection, no closing-the-loop block.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "I've got the Derby alternative provision proposal, the invoice run for August, and the DfE grant form all due this week and I've had about two hours of usable focus a day. Where do I start?",
+      "expected_output": "Recommends one outcome first with a brief trade-off, sized to the stated capacity. Identifies who controls each item and what finished looks like. Does not invent deadlines or abandon the other two items silently.",
+      "files": []
+    }
+  ]
+}
