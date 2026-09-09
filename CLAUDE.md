@@ -16,3 +16,13 @@ To use the skill outside this repository, run
 `.claude/skills/finish-the-work/scripts/install-user-level.sh`, or save
 the packaged `.skill` file to your claude.ai profile so it syncs to
 every Claude Code session.
+
+## Desktop control
+
+The `computer-use-linux` skill at `.claude/skills/computer-use-linux`
+covers controlling James's local Linux desktop: screenshots, clicks,
+typing, reading app state, saved-password lookups and router admin
+pages. It only works in a local session with the MCP server registered.
+From Claude Code on the web, say so and give the local command rather
+than improvising. Install locally with
+`.claude/skills/computer-use-linux/scripts/install-user-level.sh`.
