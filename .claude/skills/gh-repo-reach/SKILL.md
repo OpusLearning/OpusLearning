@@ -1,6 +1,6 @@
 ---
 name: gh-repo-reach
-description: Give a Claude Code session reach to a GitHub repository it cannot currently see, and diagnose repository access failures correctly. Use when a repo is out of scope, missing from the workspace, or returns 404, "not found", "no access" or a permissions error; when work spans more than one repository; when asked which repositories are available; when setting up a cloud or web session, a routine or Claude Tag to work on a repo it was not started with. Prevents the common failure of reporting a repository as inaccessible after an unauthenticated pre-check.
+description: Give a Claude Code session reach to a GitHub repository it cannot currently see, and diagnose repository access failures correctly. Use when a repo is out of scope, missing from the workspace, or returns 404, "not found", "no access" or a permissions error; when work spans more than one repository; when a cloned or attached repo's own CLAUDE.md, skills or conventions are being ignored; when asked which repositories are available; when setting up a cloud or web session, a routine or Claude Tag to work on a repo it was not started with. Prevents the common failure of reporting a repository as inaccessible after an unauthenticated pre-check.
 ---
 
 # GitHub Repo Reach
@@ -75,6 +75,13 @@ If unsure, check for the claude-code-remote tools and the absence of
    `CLAUDE.md`, skills and plugins are not loaded on the next turn, so
    the session works on the code while ignoring its instructions. This
    only works for a repo already attached by `add_repo`.
+
+   The symptom of skipping this is specific and easy to misdiagnose: the
+   session reads the attached repo's files perfectly well, but ignores
+   its `CLAUDE.md` conventions and never offers its skills. That is a
+   missing registration. It is not lazy loading, not a working directory
+   problem, and not something a session restart or a nested `CLAUDE.md`
+   rule explains. Register the root rather than reaching for those.
 
 A repository added this way is in scope immediately, even though the
 session's start-of-session scope text will not mention it.
