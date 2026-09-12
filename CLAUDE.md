@@ -16,3 +16,15 @@ To use the skill outside this repository, run
 `.claude/skills/finish-the-work/scripts/install-user-level.sh`, or save
 the packaged `.skill` file to your claude.ai profile so it syncs to
 every Claude Code session.
+
+## GitHub repo reach
+
+`gh-repo-reach` covers giving a session access to a GitHub repository it
+cannot currently see, and reading access failures correctly. It is
+defined at `.claude/skills/gh-repo-reach/SKILL.md` and triggers on its
+description rather than a hook, so it needs no settings changes.
+
+Install it for every project on a machine with
+`.claude/skills/gh-repo-reach/scripts/install-user-level.sh`. Build the
+`.skill` file for claude.ai profile sync, which also covers cloud and web
+sessions, with `.claude/skills/gh-repo-reach/scripts/package-skill.sh`.
