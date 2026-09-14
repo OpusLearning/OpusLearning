@@ -9,6 +9,7 @@
 #                 [--duration 4..15] [--first-frame URL] [--last-frame URL]
 #                 [--ref URL[,URL...]] [--no-audio] [--out DIR] [--no-wait]
 #   kie.sh raw    MODEL 'JSON_INPUT_OBJECT' [--out DIR] [--no-wait]
+#   kie.sh upload FILE [--path DIR]        # host a local image, prints its URL
 #   kie.sh status TASK_ID
 #   kie.sh wait   TASK_ID [--timeout SECONDS]
 #   kie.sh get    TASK_ID [--out DIR]      # wait, then download results
@@ -24,6 +25,9 @@ here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "$here/lib/common.sh"
 
 KIE_API_BASE="${KIE_API_BASE:-https://api.kie.ai}"
+# File upload is served from a different host to the job API. The docs give
+# api.kie.ai, which 404s; this host is the one that answers. Verified live.
+KIE_UPLOAD_BASE="${KIE_UPLOAD_BASE:-https://kieai.redpandaai.co}"
 adv_need KIE_API_KEY "Get a key at https://kie.ai -> API Keys." || exit 1
 
 auth=(-H "Authorization: Bearer $KIE_API_KEY" -H "Content-Type: application/json")
@@ -35,6 +39,21 @@ api_post_task() {           # $1 = full JSON body
   code="$(jq -r '.code // empty' <<<"$resp")"
   [ "$code" = "200" ] || adv_fail "Kie.ai rejected the task (code ${code:-unknown})." "$resp"
   jq -r '.data.taskId' <<<"$resp"
+}
+
+api_upload() {              # $1 = local file -> prints the hosted URL
+  local file="$1" path="${2:-ad-video}" resp url
+  [ -f "$file" ] || adv_fail "No such file: $file"
+  resp="$(curl -sS -X POST "$KIE_UPLOAD_BASE/api/file-stream-upload" \
+    -H "Authorization: Bearer $KIE_API_KEY" \
+    -F "file=@$file" -F "uploadPath=$path")" \
+    || adv_fail "Upload failed (network or proxy error)."
+  url="$(jq -r '.data.downloadUrl // empty' <<<"$resp")"
+  if [ -z "$url" ]; then
+    adv_fail "Upload failed (code $(jq -r '.code // "unknown"' <<<"$resp")): $(jq -r '.msg // "no message"' <<<"$resp")"
+  fi
+  echo "Hosted for 3 days by Kie.ai, then deleted." >&2
+  echo "$url"
 }
 
 api_status() {              # $1 = taskId -> full record JSON
@@ -92,7 +111,7 @@ download_urls() {           # $1 = out dir; URLs on stdin
 cmd="${1:-}"; shift || true
 prompt=""; ratio=""; resolution=""; duration=""; first_frame=""; last_frame=""
 refs=""; background=""; out=""; wait_flag=1; timeout=900; audio=1; model=""; raw_input=""
-dry_run=0
+dry_run=0; upload_path="ad-video"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -105,11 +124,12 @@ while [ $# -gt 0 ]; do
     --ref)         refs="$2"; shift 2 ;;
     --background)  background="$2"; shift 2 ;;
     --out)         out="$2"; shift 2 ;;
+    --path)        upload_path="$2"; shift 2 ;;
     --timeout)     timeout="$2"; shift 2 ;;
     --no-wait)     wait_flag=0; shift ;;
     --dry-run)     dry_run=1; shift ;;
     --no-audio)    audio=0; shift ;;
-    -h|--help)     sed -n '2,29p' "$0"; exit 0 ;;
+    -h|--help)     sed -n '2,30p' "$0"; exit 0 ;;
     *)             if [ -z "$model" ]; then model="$1"; elif [ -z "$raw_input" ]; then raw_input="$1"; fi; shift ;;
   esac
 done
@@ -147,6 +167,10 @@ case "$cmd" in
     [ -n "$model" ] && [ -n "$raw_input" ] || adv_fail "raw needs MODEL and a JSON input object"
     body="$(jq -cn --arg m "$model" --argjson i "$raw_input" '{model:$m, input:$i}')"
     ;;
+  upload)
+    [ -n "$model" ] || adv_fail "upload needs a FILE"
+    api_upload "$model" "$upload_path"
+    exit 0 ;;
   status)
     [ -n "$model" ] || adv_fail "status needs a TASK_ID"
     api_status "$model" | jq '{taskId:.data.taskId, state:.data.state, progress:.data.progress, failMsg:.data.failMsg, resultUrls:((.data.resultJson // "{}")|fromjson|.resultUrls)}'
@@ -159,7 +183,7 @@ case "$cmd" in
     if [ -n "$out" ]; then wait_for "$model" "$timeout" | download_urls "$out"; else wait_for "$model" "$timeout"; fi
     echo >&2; exit 0 ;;
   ""|-h|--help)
-    sed -n '2,29p' "$0"; exit 0 ;;
+    sed -n '2,30p' "$0"; exit 0 ;;
   *)
     adv_fail "Unknown command: $cmd" ;;
 esac

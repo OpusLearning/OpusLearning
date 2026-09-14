@@ -29,6 +29,16 @@ Returns `{"code":200,"data":{"taskId":"task_..."}}`. Codes: 401 bad key,
 read `resultUrls`. On failure read `data.failCode` and `data.failMsg`.
 `data.progress` and `data.creditsConsumed` are also returned.
 
+### Host a file
+
+`POST https://kieai.redpandaai.co/api/file-stream-upload`, multipart,
+`Authorization: Bearer` as above. Note the host: the docs give
+`api.kie.ai`, which returns 404 for this path. Verified live in September
+2026, so re-check if uploads start failing. Fields: `file` (binary, required), `uploadPath` (required, no
+leading or trailing slash), `fileName` (optional). The hosted URL comes
+back as `data.downloadUrl`. Files are deleted after three days, so this
+suits generation input, not published media.
+
 ### Models
 
 `gpt-image-2-text-to-image`
