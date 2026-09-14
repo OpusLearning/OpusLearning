@@ -5,9 +5,15 @@
 #   kie.sh image  --prompt TEXT [--ratio 9:16] [--resolution 1K|2K|4K]
 #                 [--ref URL[,URL...]] [--background transparent|opaque|auto]
 #                 [--out DIR] [--no-wait]
-#   kie.sh video  --prompt TEXT [--ratio 9:16] [--resolution 480p|720p|1080p|4k]
-#                 [--duration 4..15] [--first-frame URL] [--last-frame URL]
+#   kie.sh video  --prompt TEXT [--model 2.5|2.0|fast|RAW_STRING]
+#                 [--ratio 9:16] [--resolution 480p|720p|1080p|4k]
+#                 [--duration N] [--first-frame URL] [--last-frame URL]
 #                 [--ref URL[,URL...]] [--no-audio] [--out DIR] [--no-wait]
+#
+# Video models. Default is 2.5, the current one.
+#   2.5   bytedance/seedance-2-5     4 to 30s, 480p/720p/1080p, 30 refs
+#   2.0   bytedance/seedance-2       4 to 15s, adds 4k, 9 refs
+#   fast  bytedance/seedance-2-fast  4 to 15s, 480p/720p, cheapest to test
 #   kie.sh raw    MODEL 'JSON_INPUT_OBJECT' [--out DIR] [--no-wait]
 #   kie.sh upload FILE [--path DIR]        # host a local image, prints its URL
 #   kie.sh status TASK_ID
@@ -111,7 +117,7 @@ download_urls() {           # $1 = out dir; URLs on stdin
 cmd="${1:-}"; shift || true
 prompt=""; ratio=""; resolution=""; duration=""; first_frame=""; last_frame=""
 refs=""; background=""; out=""; wait_flag=1; timeout=900; audio=1; model=""; raw_input=""
-dry_run=0; upload_path="ad-video"
+dry_run=0; upload_path="ad-video"; video_model="2.5"
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -119,6 +125,7 @@ while [ $# -gt 0 ]; do
     --ratio)       ratio="$2"; shift 2 ;;
     --resolution)  resolution="$2"; shift 2 ;;
     --duration)    duration="$2"; shift 2 ;;
+    --model)       video_model="$2"; shift 2 ;;
     --first-frame) first_frame="$2"; shift 2 ;;
     --last-frame)  last_frame="$2"; shift 2 ;;
     --ref)         refs="$2"; shift 2 ;;
@@ -129,7 +136,7 @@ while [ $# -gt 0 ]; do
     --no-wait)     wait_flag=0; shift ;;
     --dry-run)     dry_run=1; shift ;;
     --no-audio)    audio=0; shift ;;
-    -h|--help)     sed -n '2,30p' "$0"; exit 0 ;;
+    -h|--help)     sed -n '2,36p' "$0"; exit 0 ;;
     *)             if [ -z "$model" ]; then model="$1"; elif [ -z "$raw_input" ]; then raw_input="$1"; fi; shift ;;
   esac
 done
@@ -161,7 +168,14 @@ case "$cmd" in
     [ -n "$last_frame" ]  && input="$(jq -c --arg v "$last_frame" '.last_frame_url=$v' <<<"$input")"
     [ -n "$refs" ]        && input="$(jq -c --argjson v "$(refs_json)" '.reference_image_urls=$v' <<<"$input")"
     [ "$audio" -eq 0 ]    && input="$(jq -c '.generate_audio=false' <<<"$input")"
-    body="$(jq -cn --argjson i "$input" '{model:"bytedance/seedance-2", input:$i}')"
+    case "$video_model" in
+      2.5|2-5)      m="bytedance/seedance-2-5" ;;
+      2.0|2)        m="bytedance/seedance-2" ;;
+      fast)         m="bytedance/seedance-2-fast" ;;
+      */*)          m="$video_model" ;;
+      *)            adv_fail "Unknown --model: $video_model. Use 2.5, 2.0, fast, or a full model string." ;;
+    esac
+    body="$(jq -cn --arg m "$m" --argjson i "$input" '{model:$m, input:$i}')"
     ;;
   raw)
     [ -n "$model" ] && [ -n "$raw_input" ] || adv_fail "raw needs MODEL and a JSON input object"
@@ -183,7 +197,7 @@ case "$cmd" in
     if [ -n "$out" ]; then wait_for "$model" "$timeout" | download_urls "$out"; else wait_for "$model" "$timeout"; fi
     echo >&2; exit 0 ;;
   ""|-h|--help)
-    sed -n '2,30p' "$0"; exit 0 ;;
+    sed -n '2,36p' "$0"; exit 0 ;;
   *)
     adv_fail "Unknown command: $cmd" ;;
 esac

@@ -63,7 +63,7 @@ stills before moving on. A weak still makes a weak clip.
 
 ## Step 4: clips
 
-Each still becomes the first frame of a Seedance 2.0 clip:
+Each still becomes the first frame of a Seedance clip:
 
 ```bash
 scripts/kie.sh video --prompt "slow push in, product held to camera" \
@@ -74,6 +74,11 @@ scripts/kie.sh video --prompt "slow push in, product held to camera" \
 The script polls until the job finishes and downloads the file. Jobs
 take a few minutes. If one times out, the task id is printed; resume
 with `scripts/kie.sh get TASK_ID --out ./out/clips`.
+
+Prove the pipeline on the cheap model before committing credit to the
+real render. `--model fast --resolution 480p --duration 4 --no-audio` is
+the least expensive way to confirm a prompt behaves, then re-run the same
+prompt at the settings you actually want.
 
 Keep motion small and specific. Broad instructions produce drifting,
 unusable footage. Audio is on by default; add `--no-audio` when you

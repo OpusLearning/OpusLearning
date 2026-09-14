@@ -51,15 +51,29 @@ suits generation input, not published media.
 `gpt-image-2-image-to-image`
 - as above, plus `input_urls`, an array of up to 16 image URLs, required
 
-`bytedance/seedance-2`
-- `prompt` string, 3 to 20000 chars, required
-- `resolution` 480p, 720p (default), 1080p, 4k
+`bytedance/seedance-2-5` is the current video model and the skill default.
+- `prompt` string, up to 30000 chars, required
+- `resolution` 480p, 720p (default), 1080p. No 4k on this model
+- `aspect_ratio` 1:1, 4:3, 3:4, 16:9, 9:16, 21:9, adaptive (default)
+- `duration` integer 4 to 30 seconds, or -1 for automatic, default 5
+- `first_frame_url`, `last_frame_url` image URL or `asset://{assetId}`.
+  `last_frame_url` cannot be sent alone; it needs `first_frame_url` too
+- `reference_image_urls` up to 30, `reference_video_urls` up to 10,
+  `reference_audio_urls` up to 10 of 2 to 30 seconds, 15MB each
+- `generate_audio` boolean default true, `return_last_frame` default
+  false, `output_format` mp4 or mov, `web_search`, `nsfw_checker`
+
+`bytedance/seedance-2` is the previous generation.
+- `prompt` 3 to 20000 chars, `duration` 4 to 15 seconds, default 5
+- `resolution` 480p, 720p (default), 1080p, 4k. This model has 4k
 - `aspect_ratio` 1:1, 4:3, 3:4, 16:9 (default), 9:16, 21:9, adaptive
-- `duration` integer 4 to 15 seconds, default 5
-- `first_frame_url`, `last_frame_url` image URL or `asset://{assetId}`
-- `reference_image_urls` up to 9, `reference_video_urls` up to 3 of 2 to
-  15 seconds, `reference_audio_urls` up to 3 of 2 to 15 seconds
+- `first_frame_url`, `last_frame_url`, `reference_image_urls` up to 9,
+  `reference_video_urls` and `reference_audio_urls` up to 3 each
 - `generate_audio` boolean, default true
+
+`bytedance/seedance-2-fast` is the cheap one, for proving a pipeline.
+- `resolution` 480p or 720p only, `duration` 4 to 15 seconds
+- same frame and reference fields as seedance-2
 
 Docs: https://docs.kie.ai/market/bytedance/seedance-2 and
 https://docs.kie.ai/market/gpt/gpt-image-2-text-to-image
