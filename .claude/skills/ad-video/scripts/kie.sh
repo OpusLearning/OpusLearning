@@ -81,6 +81,10 @@ wait_for() {                # $1 = taskId, $2 = timeout seconds
     state="$(jq -r '.data.state // "unknown"' <<<"$rec")"
     case "$state" in
       success)
+        printf '\r%s: done in %ss, %s credits used%s\n' "$id" \
+          "$(( $(jq -r '.data.costTime // 0' <<<"$rec") / 1000 ))" \
+          "$(jq -r '.data.creditsConsumed // "unknown"' <<<"$rec")" \
+          "                    " >&2
         jq -r '(.data.resultJson // "{}") | fromjson | (.resultUrls // [])[]' <<<"$rec"
         return 0 ;;
       fail)
@@ -187,7 +191,7 @@ case "$cmd" in
     exit 0 ;;
   status)
     [ -n "$model" ] || adv_fail "status needs a TASK_ID"
-    api_status "$model" | jq '{taskId:.data.taskId, state:.data.state, progress:.data.progress, failMsg:.data.failMsg, resultUrls:((.data.resultJson // "{}")|fromjson|.resultUrls)}'
+    api_status "$model" | jq '{taskId:.data.taskId, state:.data.state, progress:.data.progress, creditsConsumed:.data.creditsConsumed, failMsg:.data.failMsg, resultUrls:((.data.resultJson // "{}")|fromjson|.resultUrls)}'
     exit 0 ;;
   wait)
     [ -n "$model" ] || adv_fail "wait needs a TASK_ID"
