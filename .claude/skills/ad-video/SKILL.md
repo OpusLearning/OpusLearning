@@ -16,9 +16,14 @@ Run `scripts/check-setup.sh`. It creates the credentials file on first
 run and tells you exactly which key is missing or rejected. Do not start
 generating until it passes, because each failed job still costs credit.
 
+Store a key with `printf %s "the-key" | scripts/set-key.sh KIE_API_KEY`,
+which reads from stdin so the value never reaches the command line, shell
+history or the process list, and never gets echoed back.
+
 Credentials live in `~/.config/ad-video/env` with permissions 600. They
 are never committed, never pasted into chat and never written into a
-script. If a key is missing, say which one and where to get it, then
+script. If a key does end up in a transcript, say so and tell James to
+revoke it, rather than letting it stand. If a key is missing, say which one and where to get it, then
 stop and wait. You cannot obtain these keys yourself; they need a signed
 in browser and a payment method.
 
