@@ -12,6 +12,10 @@ and the closing summary.
 
 Style: UK English, direct and respectful, short paragraphs, no em dashes.
 
+Skills in this repository: `finish-the-work` (posture, auto-loaded) and
+`ad-video` (short vertical ad production with Kie.ai and Zernio; see
+`.claude/skills/ad-video/SKILL.md`).
+
 To use the skill outside this repository, run
 `.claude/skills/finish-the-work/scripts/install-user-level.sh`, or save
 the packaged `.skill` file to your claude.ai profile so it syncs to
