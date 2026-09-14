@@ -43,7 +43,19 @@ api_post_task() {           # $1 = full JSON body
   resp="$(curl -sS -X POST "$KIE_API_BASE/api/v1/jobs/createTask" "${auth[@]}" -d "$1")" \
     || adv_fail "Request to Kie.ai failed (network or proxy error)."
   code="$(jq -r '.code // empty' <<<"$resp")"
-  [ "$code" = "200" ] || adv_fail "Kie.ai rejected the task (code ${code:-unknown})." "$resp"
+  if [ "$code" != "200" ]; then
+    local msg; msg="$(jq -r '.msg // ""' <<<"$resp")"
+    case "$msg" in
+      *"not authorized to use this model"*)
+        echo "Kie.ai refused this model, not your key." >&2
+        echo "  The key authenticated, but it is not scoped to the model requested." >&2
+        echo "  Fix it at https://kie.ai/api-key : edit the key's allowed models," >&2
+        echo "  or create a key with the models you need enabled." >&2
+        exit 1 ;;
+      *)
+        adv_fail "Kie.ai rejected the task (code ${code:-unknown}): $msg" ;;
+    esac
+  fi
   jq -r '.data.taskId' <<<"$resp"
 }
 

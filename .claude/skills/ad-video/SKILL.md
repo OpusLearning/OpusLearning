@@ -53,7 +53,18 @@ Hook in the first 1.5 seconds, single benefit in the middle, one clear
 call to action at the end. Get agreement on the shot list first. Text is
 free to change; a rendered clip is not.
 
-## Step 3: stills
+## A note on model access
+
+A Kie.ai key can be scoped to particular models. A key that authenticates
+fine will still be refused with "not authorized to use this model" for
+anything outside its scope. That is a dashboard setting at
+https://kie.ai/api-key, not a broken key, and the script says so.
+
+If only Seedance is available, skip step 3 entirely. Seedance generates
+from a text prompt alone, so the stills step is an improvement in control,
+not a requirement.
+
+## Step 3: stills, when an image model is available
 
 Generate a key still per shot, at 9:16, using the product references:
 
