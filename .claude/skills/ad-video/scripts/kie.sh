@@ -97,10 +97,16 @@ wait_for() {                # $1 = taskId, $2 = timeout seconds
           "$(( $(jq -r '.data.costTime // 0' <<<"$rec") / 1000 ))" \
           "$(jq -r '.data.creditsConsumed // "unknown"' <<<"$rec")" \
           "                    " >&2
-        jq -r '(.data.resultJson // "{}") | fromjson | (.resultUrls // [])[]' <<<"$rec"
+        jq -r '(.data.resultJson | if (. // "") == "" then "{}" else . end) | fromjson | (.resultUrls // [])[]' <<<"$rec"
         return 0 ;;
       fail)
-        adv_fail "Task $id failed: $(jq -r '.data.failMsg // "no message"' <<<"$rec")" ;;
+        echo >&2
+        msg="$(jq -r '.data.failMsg // "no message"' <<<"$rec")"
+        case "$msg" in *"security audit"*)
+          echo "Blocked by Kie.ai's content filter (no credits charged). Avoid named or" >&2
+          echo "  trademarked characters and franchise terms; describe the look instead." >&2 ;;
+        esac
+        adv_fail "Task $id failed: $msg" ;;
       waiting|queuing|generating)
         progress="$(jq -r '.data.progress // 0' <<<"$rec")"
         printf '\r%s: %s (%s%%) %ss elapsed   ' "$id" "$state" "$progress" "$waited" >&2 ;;
@@ -203,7 +209,7 @@ case "$cmd" in
     exit 0 ;;
   status)
     [ -n "$model" ] || adv_fail "status needs a TASK_ID"
-    api_status "$model" | jq '{taskId:.data.taskId, state:.data.state, progress:.data.progress, creditsConsumed:.data.creditsConsumed, failMsg:.data.failMsg, resultUrls:((.data.resultJson // "{}")|fromjson|.resultUrls)}'
+    api_status "$model" | jq '{taskId:.data.taskId, state:.data.state, progress:.data.progress, creditsConsumed:.data.creditsConsumed, failMsg:.data.failMsg, resultUrls:((.data.resultJson | if (. // "") == "" then "{}" else . end)|fromjson|.resultUrls)}'
     exit 0 ;;
   wait)
     [ -n "$model" ] || adv_fail "wait needs a TASK_ID"
