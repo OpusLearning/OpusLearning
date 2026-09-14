@@ -1,6 +1,6 @@
 ---
 name: ad-video
-description: Produce a short vertical ad video from a product brief and publish it to social accounts. Use when asked to make an ad, promo, reel, short, 9:16 video, product video or social video, to generate images or video with Kie.ai (GPT Image 2, Seedance 2.0), or to schedule and post content through Zernio or Postiz. Covers brief to script to stills to clips to caption to scheduled post.
+description: Produce a short vertical ad video from a product brief and publish it to social accounts. Use when asked to make an ad, promo, reel, short, 9:16 video, product video or social video, to generate images or video with Kie.ai (GPT Image 2, Seedance 2.5), or to schedule and post content through Zernio or Postiz. Covers brief to script to stills to clips to caption to scheduled post.
 ---
 
 # Ad Video
