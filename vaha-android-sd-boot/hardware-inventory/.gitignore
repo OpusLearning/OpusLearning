@@ -1,0 +1,4 @@
+# Partition backups and other large binaries do not belong in the repository.
+*.img
+*.bin
+*.tar.gz
